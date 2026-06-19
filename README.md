@@ -2,13 +2,23 @@
 
 **Structured memory for persistent characters — in plain Markdown.**
 
-CHARACTER.md is an open format for describing characters that need to stay consistent over time. It organizes a character's memory into three layers — dispositions, knowledges, and experiences — so that AI agents, game engines, or any system loading the file can distinguish between how a character behaves, what it knows, and what has happened to it.
+CHARACTER.md is an open format that gives characters structured, evolving memory — so they stay consistent whether a conversation is ten turns or ten thousand.
 
-## The problem
+## What you can build with it
 
-Most character descriptions are a single block of unstructured text. Everything lives in one place: personality traits, factual knowledge, relationship history, current goals. There is no way to tell which parts should change over time and which should not. When the character accumulates new information or goes through events, the consumer has no convention for where to record that — so the state drifts, contradicts itself, or simply gets lost.
+Most character descriptions are a single block of unstructured text that drifts over time — personality, knowledge, and history all mixed together with no way to tell what should change and what should not. CHARACTER.md separates these concerns, and that separation opens up real applications:
 
-## Three kinds of memory
+**A personal AI that actually remembers.** Define an assistant that knows your preferences, tracks your ongoing projects, and accumulates context across sessions — without starting from zero every time.
+
+**Domain experts you can hand to anyone.** Package a tax advisor, an investment analyst, or a legal researcher as a portable file. Their specialized knowledge, operating rules, and case history travel with them — drop the file into any AI, on any platform, and get consistent expertise immediately.
+
+**Game characters that don't forget.** Give an NPC a memory that persists across play sessions. They remember what the player said, what deals were struck, what grudges remain. The world feels alive because the characters in it have continuity.
+
+**Fictional characters faithful to the story.** Distill a novel's protagonist into a structured profile — their voice, their knowledge of the world, their lived experiences — and let readers interact with them without the AI inventing things that never happened.
+
+## How it works
+
+Three kinds of memory, each with different update rules:
 
 **Dispositions** — how they act. Behavioral rules, speech patterns, boundaries. These rarely change.
 
@@ -26,11 +36,7 @@ character-name/
 └── experiences/          ← event history
 ```
 
-The main file holds what matters right now. The folders hold long-term memory, loaded when needed.
-
-The same structure works for more than fictional characters. An AI assistant that remembers your preferences and tracks ongoing projects. A domain expert — a tax advisor, an investment analyst, a legal researcher — that retains its specialized knowledge across sessions. A portable skill package you can hand to any AI on any platform and get consistent behavior immediately. A novel's protagonist who stays faithful to the story no matter who prompts them.
-
-Plain Markdown, no infrastructure required — works with any AI, any platform. With multiple CHARACTER.md files, one person can run an entire team of specialists using nothing but a chat interface.
+The main file holds what matters right now. The folders hold long-term memory, loaded when needed. Plain Markdown, no infrastructure required — works with any AI, any platform. With multiple CHARACTER.md files, one person can run an entire team of specialists using nothing but a chat interface.
 
 ## Quick example
 
