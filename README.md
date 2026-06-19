@@ -10,7 +10,7 @@ Most character descriptions are a single block of unstructured text that drifts 
 
 That separation opens up real applications:
 
-**A personal AI that actually remembers.** Define an assistant that knows your preferences, tracks your ongoing projects, and accumulates context across sessions — without starting from zero every time.
+**A personal AI that actually remembers.** Define an assistant that knows your preferences, tracks your ongoing projects, and accumulates context across sessions — without starting from zero every time. Load several characters into one conversation and they each bring their own knowledge, rules, and history — a team that actually works together.
 
 **Domain experts you can hand to anyone.** Package a tax advisor, an investment analyst, or a legal researcher as a portable file. Their specialized knowledge, operating rules, and case history travel with them — drop the file into any AI, on any platform, and get consistent expertise immediately.
 
