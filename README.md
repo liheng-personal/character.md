@@ -2,21 +2,19 @@
 
 **Structured memory for persistent characters — in plain Markdown.**
 
-You give an AI a character to play. It's great for a while. Then it starts forgetting things. It contradicts itself. It loses track of what it knows and what happened to it.
+CHARACTER.md is an open format for describing characters that need to stay consistent over time. It organizes a character's memory into three layers — dispositions, knowledges, and experiences — so that AI agents, game engines, or any system loading the file can distinguish between how a character behaves, what it knows, and what has happened to it.
 
-Sound familiar?
+## The problem
 
-- You spend more time correcting your AI assistant than actually working with it.
-- Your game character meets the player a second time and has no memory of the first.
-- You ask an AI to play a character from your novel, and it invents things that never happened.
+Most character descriptions are a single block of unstructured text. Everything lives in one place: personality traits, factual knowledge, relationship history, current goals. There is no way to tell which parts should change over time and which should not. When the character accumulates new information or goes through events, the consumer has no convention for where to record that — so the state drifts, contradicts itself, or simply gets lost.
 
-CHARACTER.md fixes this by giving characters structured memory — three kinds, matching how memory actually works:
+## Three kinds of memory
 
-**Dispositions** — how they act. Behavioral rules, speech patterns, boundaries.
+**Dispositions** — how they act. Behavioral rules, speech patterns, boundaries. These rarely change.
 
-**Knowledges** — what they know. Facts, current state, reference data.
+**Knowledges** — what they know. Facts, current state, reference data. Some entries are stable; others update as circumstances change.
 
-**Experiences** — what happened to them. Events, decisions, consequences.
+**Experiences** — what happened to them. Events, decisions, consequences. This layer only grows.
 
 These map to a file tree:
 
@@ -28,9 +26,9 @@ character-name/
 └── experiences/          ← event history
 ```
 
-The main file holds what matters right now. The folders hold long-term memory, loaded when needed. Knowledge updates as things change, experiences grow as events unfold, and the character stays coherent — whether the conversation is ten turns or ten thousand.
+The main file holds what matters right now. The folders hold long-term memory, loaded when needed. Plain Markdown, no tooling required — works with any AI, any platform.
 
-It's plain Markdown. Use it with any AI, any platform, no infrastructure required. Each character is a self-contained file — so with multiple CHARACTER.md files, one person can run an entire team of AI specialists, each with its own expertise, memory, and personality, using nothing but a chat interface.
+With multiple CHARACTER.md files, one person can run an entire team of AI specialists, each with its own expertise, memory, and personality, using nothing but a chat interface.
 
 ## Quick example
 
@@ -67,10 +65,10 @@ forge after she left, but he hasn't slept well since.
 
 ## Where to start
 
-- **Using AI tools day-to-day** — browse the [examples](examples/) to see how CHARACTER.md keeps characters consistent across conversations.
-- **Building agents or game characters** — read the [spec](SPEC.md) for the full format specification and conformance requirements.
-- **Authors and voice actors** — start with the [examples](examples/) to see how characters are structured. For a live demo of characters from published fiction, see [book-mcp](https://github.com/liheng-personal/book-mcp).
-- **Curious about the design?** — [RATIONALE.md](RATIONALE.md) explains the cognitive science foundation.
+- **Using AI day-to-day** — browse the [examples](examples/) to see how CHARACTER.md keeps characters consistent across conversations.
+- **Building agents or games** — read the [spec](SPEC.md) for the full format definition and conformance requirements.
+- **Authors and voice actors** — start with the [examples](examples/), then see [book-mcp](https://github.com/liheng-personal/book-mcp) for a live demo with characters from published fiction.
+- **Curious about the design** — [RATIONALE.md](RATIONALE.md) explains the cognitive science foundation.
 
 ## License
 
