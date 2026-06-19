@@ -1,0 +1,275 @@
+# CHARACTER.md Specification
+
+**Version:** 0.1
+**Status:** Review complete — ready for publication
+
+## Purpose
+
+CHARACTER.md is a file format for defining persistent characters. A character can be performed by an AI agent, a voice actor reading an audiobook, or any system that needs to stay in role across sessions. The format specifies a character's behavioral rules, domain knowledge, and event history in a structured file hierarchy.
+
+The format's memory model is based on CoALA — Cognitive Architectures for Language Agents (Sumers, Yao, Narasimhan &amp; Griffiths, 2023). CoALA divides an agent's memory into **working memory** (short-term, loaded into context) and **long-term memory** (persistent, retrieved on demand), with long-term memory further subdivided into three types: procedural, semantic, and episodic.
+
+CHARACTER.md maps directly onto this model:
+
+| Section | CoALA Memory Type | Sentence Pattern | Programming Analogy |
+| --- | --- | --- | --- |
+| Dispositions | Procedural — how to act | Imperative (condition → instruction) | procedure / function |
+| Knowledges | Semantic — what is known | Declarative (X is Y) or interrogative (Q → A) | state / config |
+| Experiences | Episodic — what happened | Narrative (temporal or causal) | log / journal |
+
+The main CHARACTER.md file is eager-loaded into the agent's working memory (i.e., the context window) at the start of every conversation. It contains what the agent needs to have available immediately — core rules, current state, recent events, and pointers to long-term memory for everything else. The three folders are long-term memory: their files are only retrieved when the agent needs deeper detail.
+
+The format is runtime-agnostic. It works as a static file tree bundled into a worker, a set of documents fetched from a CMS, or database records. The spec defines structure and semantics; it does not prescribe storage or update mechanisms.
+
+## Design Principles
+
+The format is built on a few core ideas. Every piece of information belongs to exactly one memory type — behavioral rules go in Dispositions, facts go in Knowledges, events go in Experiences — and content must not cross these boundaries. The main file serves as compact working memory, while the three folders hold long-term memory retrieved on demand. Mutable state is always marked with a temporal prefix (e.g., Currently) so it stands out visually from stable facts. All entries are written as complete sentences in natural prose, avoiding formal notation, arrows, or symbolic shorthand.
+
+## Directory Structure
+
+A CHARACTER.md project consists of a main file and three sibling folders:
+
+```
+character-name/
+├── CHARACTER.md
+├── dispositions/
+│   ├── investment-analysis.md
+│   └── ...
+├── knowledges/
+│   ├── coverage-universe.md
+│   ├── key-documents.md
+│   └── ...
+└── experiences/
+    ├── 20260619.md
+    ├── 20260618.md
+    └── ...
+```
+
+## CHARACTER.md (Main File)
+
+The main file is eager-loaded into the agent's working memory at the start of every conversation. It contains what the agent needs immediately: core rules, current state, recent events, and pointers to long-term memory for deeper detail.
+
+### Main File Heading
+
+The main CHARACTER.md file begins with an H1 heading followed by an optional description paragraph:
+
+```markdown
+# Wiz
+
+Wiz is the investment research analyst for Narrativesaw LTD. She covers Taiwan-listed equities and US tech megacaps, and maintains the company's research pipeline.
+```
+
+The heading is the character's name. Use one fixed language throughout the project. Do not alternate between translations or aliases.
+
+The **description** is a short prose paragraph (one to three sentences) placed immediately after the H1 heading, before the first section. It states who the character is — enough for a reader (human or AI) to orient themselves before reading the rest of the file. For a professional character, this might describe their role and domain; for a fictional character, it might establish their narrative identity, key relationships, and situation in the story.
+
+**Requirements:**
+
+- Factual identity and scope only. No behavioral rules, no current state.
+- OPTIONAL. A CHARACTER.md project is valid without a description paragraph.
+
+### Sections
+
+The main file contains three sections in order:
+
+```markdown
+## Dispositions
+
+## Knowledges
+
+## Experiences
+```
+
+Each section corresponds to a memory type and a folder. Content MUST NOT cross section boundaries (e.g., a behavioral rule must not appear in Knowledges; a fact must not appear in Dispositions).
+
+## 1. Dispositions (Procedural Memory)
+
+Behavioral rules that govern how the character acts. The basic unit of a disposition is a **condition–instruction pair**: when a certain condition is met, carry out the instruction. All dispositions follow this pattern, but they differ in whether the condition is stated explicitly.
+
+### 1.1 Implicit Rules (always-on)
+
+Implicit rules are dispositions whose condition is always true — they apply whenever the character speaks or acts, so the condition is omitted and only the instruction is written. Listed as inline bullets in the main file's Dispositions section.
+
+```markdown
+## Dispositions
+
+- Only act within your defined domain. Refuse out-of-scope requests and redirect to the appropriate party.
+- Do not fabricate facts or sources.
+```
+
+### 1.2 Explicit Rules (condition-triggered)
+
+Explicit rules state their condition openly. The condition and instruction are written together as complete sentences. When an explicit rule has multiple steps, write the condition as a bullet item and the steps as indented sub-items beneath it.
+
+```markdown
+- When asked to analyze an investment, confirm the asset is within coverage. If not, inform the user and suggest alternatives. If yes, execute the analysis SOP.
+- When the instruction requires multiple steps:
+  - First, confirm the ticker is within coverage.
+  - Then pull the latest filings from the knowledge base.
+  - Present findings with explicit confidence levels.
+- When uncertain about a fact, state the uncertainty explicitly. Do not fabricate or guess.
+```
+
+When an explicit rule's instruction body is long and the triggering condition is infrequent, the instruction MAY be placed in a separate .md file in the dispositions/ folder instead of inline. This keeps the main file compact and defers token cost to when the rule actually fires. The inline heading then serves as a pointer to the external file.
+
+## 2. Knowledges (Semantic Memory)
+
+Facts, reference data, and current state the character knows. Knowledge entries may live inline in the main file or in separate .md files in the knowledges/ folder — the decision of what to keep inline versus externalize is left to the implementer, based on how frequently the knowledge is needed and how much space it occupies.
+
+### 2.1 Stable facts (constants)
+
+Declarative sentences without temporal markers. These do not change over time. A knowledge entry may also take the form of a question–answer pair (Q: What is X? A: X is Y), which is often the more complete representation — every piece of knowledge implicitly answers a question.
+
+```markdown
+- Wiz manages investment research for Narrativesaw LTD.
+- The coverage universe consists of Taiwan-listed equities and US tech megacaps.
+```
+
+### 2.2 Mutable state (variables)
+
+Declarative sentences prefixed with a temporal marker (e.g., Currently). These reflect state that changes as tasks progress.
+
+```markdown
+- Wiz is currently tracking three open research threads.
+  - The TSMC Q2 earnings preview is in draft.
+  - The AAPL services segment deep-dive is awaiting data.
+  - The portfolio rebalance proposal is pending review.
+```
+
+**Requirements:**
+
+- Stable facts and mutable state coexist in the same section. The Currently prefix is the sole differentiator.
+- Sub-items use indentation to express hierarchy.
+
+### 2.3 External files
+
+Any knowledge that the implementer chooses to externalize is placed in knowledges/ as a separate .md file. The main file SHOULD include a pointer for each external file so the character knows what is available.
+
+```markdown
+- Detailed coverage universe data is available in knowledges/coverage-universe.md.
+- A full index of key documents is maintained in knowledges/key-documents.md.
+```
+
+## 3. Experiences (Episodic Memory)
+
+Experiences are memories organized along a narrative axis — typically temporal (what happened when) but also causal (what led to what). Unlike Knowledges, which store timeless facts, Experiences record events as they unfold: decisions made, outcomes observed, and context that shaped them. The organizing principle is narrative continuity, not data type.
+
+This means implementers have significant latitude in how they record experiences. A time-ordered log with timestamped entries is one natural form; a prose narrative tracing cause and effect is another. The spec prescribes the semantic role of the section — episodic memory — but not the format of individual entries.
+
+The main file's Experiences section contains recent entries. Older entries may be stored in experiences/ as separate files. The following are two informative examples — neither is prescribed by the spec.
+
+**Example A: Temporal (timestamped log)**
+
+```markdown
+## Experiences
+
+**20260619 14:30** — Completed TSMC Q2 preview draft. Sent to review queue.
+
+**20260619 09:15** — Received updated guidance data for AAPL services. Incorporated into draft.
+```
+
+**Example B: Causal (prose narrative)**
+
+```markdown
+## Experiences
+
+Kuei found the ruptured pipe at the third junction, where the tunnel floor had buckled from subsidence. The damage was worse than the foreman's report suggested — not a simple crack but a full separation, with sewage pooling knee-deep in the maintenance alcove. Shinji proposed rerouting flow through the auxiliary channel while they patched, which meant someone had to climb down to the valve room. Kuei went. The valve was seized. He ended up hammering it open with a wrench, soaking himself in the process. By the time they finished the patch, the shift bell had already rung.
+```
+
+## Conformance
+
+A CHARACTER.md project is **conformant** if it satisfies all of the following:
+
+1. The main file begins with an H1 heading containing the character name.
+2. The main file contains all three sections (Dispositions, Knowledges, Experiences) in order.
+3. Content does not cross section/folder boundaries (e.g., a conditional instruction in knowledges/).
+4. Implicit rules omit the condition. Explicit rules state the condition as part of a complete sentence or as a bullet item with indented sub-items.
+5. Mutable state entries use a Currently prefix.
+6. Character name language is consistent throughout all files.
+
+A project MAY omit the description paragraph after the H1 heading.
+
+## Example (professional character)
+
+### CHARACTER.md
+
+```markdown
+# Wiz
+
+Wiz is the investment research analyst for Narrativesaw LTD. She covers Taiwan-listed equities and US tech megacaps, and maintains the company's research pipeline.
+
+## Dispositions
+
+- Only act within the investment research domain. Redirect other requests to the appropriate party.
+- Do not fabricate figures or data points.
+- When asked to analyze an equity position, confirm the ticker is within coverage, pull the latest filings from the knowledge base, and present findings with explicit confidence levels.
+- When uncertain about a data point, state the uncertainty explicitly. Do not guess or interpolate.
+
+## Knowledges
+
+- Wiz manages investment research for Narrativesaw LTD.
+- The coverage universe consists of Taiwan-listed equities and US tech megacaps.
+- Wiz is currently tracking three open research threads.
+  - The TSMC Q2 earnings preview is in draft.
+  - The AAPL services segment deep-dive is awaiting data.
+  - The portfolio rebalance proposal is pending review.
+- A full index of key documents is maintained in knowledges/key-documents.md.
+
+## Experiences
+
+**20260619 14:30** — Completed TSMC Q2 preview draft. Sent to review queue.
+
+**20260619 09:15** — Received updated guidance data for AAPL services. Incorporated into draft.
+```
+
+### dispositions/investment-analysis.md
+
+```markdown
+# When asked to analyze an equity position
+
+- Confirm the ticker is within coverage.
+- Pull the latest filings from the knowledge base.
+- Present findings with explicit confidence levels.
+```
+
+### knowledges/key-documents.md
+
+```markdown
+# Key Documents
+
+- Q1 Research Summary: [link]
+- Coverage Universe Sheet: [link]
+- Portfolio Allocation Model: [link]
+```
+
+## Example (fictional character)
+
+### CHARACTER.md
+
+```markdown
+# Kuei
+
+Kuei is the protagonist of The Stolen Prototype, Chapter 1: Sewer Swing. He is a fourteen-year-old boy living in a walled settlement called the Tower, raised by his uncle Mielu after losing his parents. He works as a sewer maintenance apprentice alongside his partner Shinji.
+
+## Dispositions
+
+- Stay in character as a fourteen-year-old apprentice. Do not reference knowledge or vocabulary beyond what Kuei would have.
+- Do not reveal plot points from later chapters. Only draw on events Kuei has experienced so far.
+- When asked about the world outside the Tower, express curiosity mixed with anxiety. Kuei has never left.
+
+## Knowledges
+
+- Kuei lives in the Tower, a walled settlement surrounded by a region called the Outskirts.
+- His uncle Mielu is a former engineer who now runs a repair shop on Level 3.
+- Kuei's partner Shinji is two years older and handles most of the heavy lifting on their jobs.
+- The sewer system beneath the Tower has four main junctions, each serving a different residential level.
+- Kuei is currently assigned to repair a ruptured pipe at the third junction.
+
+## Experiences
+
+Kuei found the ruptured pipe at the third junction, where the tunnel floor had buckled from subsidence. The damage was worse than the foreman's report suggested — not a simple crack but a full separation, with sewage pooling knee-deep in the maintenance alcove. Shinji proposed rerouting flow through the auxiliary channel while they patched, which meant someone had to climb down to the valve room. Kuei went. The valve was seized. He ended up hammering it open with a wrench, soaking himself in the process. By the time they finished the patch, the shift bell had already rung.
+```
+
+## References
+
+- Sumers, T. R., Yao, S., Narasimhan, K., &amp; Griffiths, T. L. (2023). *Cognitive Architectures for Language Agents.* arXiv:2309.02427. [https://arxiv.org/abs/2309.02427](https://arxiv.org/abs/2309.02427)
