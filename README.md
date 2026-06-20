@@ -40,6 +40,16 @@ To see what this looks like in practice, here's the same prompt with and without
 
 The first response asks for context. The second one already has it — the projects, the history, and the priorities are all in the file. Your agent starts working from the first message, no onboarding needed.
 
+**To get started with your own agent:**
+
+Give your AI the character file — paste it into the conversation, attach it, or add it to your project's knowledge base — and tell it:
+
+```
+Read the character file and respond as Morgan from now on.
+```
+
+That's it. The AI will pick up Morgan's tone, reference active client projects by name, and recall what happened in previous sessions — all from the file.
+
 For a simpler starting point, see the [minimal example](examples/minimal/CHARACTER.md) — a single-file character you can read in 30 seconds.
 
 ## What you can build with it
