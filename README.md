@@ -1,12 +1,31 @@
 # CHARACTER.md
 
-CHARACTER.md is what turns a language model into a specific character — one that knows how to behave, carries domain and personal knowledge, and remembers what's happened recently.
+CHARACTER.md replaces your entire AI setup with three kinds of sentences.
 
-Every AI platform scatters your setup across separate mechanisms — memory, custom instructions, projects, skills — each storing a different slice of who your AI is supposed to be. CHARACTER.md replaces all of that with three kinds of sentences. Rules go in Dispositions. Facts go in Knowledges. Stories go in Experiences. Every piece of your AI setup maps to one of these three. There is no fourth.
+You set up memory in one place, write instructions in another, organize knowledge in a project, and pin skills somewhere else. Then you switch platforms and start over, or the AI starts contradicting things you taught it three months ago. The more you put in, the more there is to break.
 
-Your entire AI configuration becomes one file. The only thing your platform needs to do is read it.
+That's because every platform organizes your setup by mechanism — one bucket for memory, another for instructions, another for skills. Each platform's buckets are different, so the same knowledge ends up in different places depending on the platform. The structure only works where it was built.
 
-Here's the same prompt with and without a character file:
+CHARACTER.md organizes by meaning instead — specifically, by sentence type. Everything you'd put into an AI setup is one of three things:
+
+**Dispositions** — rules. Written as conditional-instruction pairs: "When X, do Y." Behavior, skills, boundaries, preferences. The AI reads an instruction and follows it.
+
+**Knowledges** — facts. Written as statements: "X is Y." Domain expertise, personal context, current status. The AI reads a fact and trusts it — or updates it when the fact changes.
+
+**Experiences** — stories. Written as narratives: what happened, in what order, what it led to. The AI reads a story and remembers it.
+
+```
+CHARACTER.md
+├── Dispositions      (rules — conditional-instruction pairs)
+├── Knowledges        (facts — statements)
+└── Experiences       (stories — narratives)
+```
+
+That's it. Every aspect of an AI setup — behavior, knowledge, context, history, skills, preferences — maps to one of these three. There is no fourth.
+
+No special syntax. No metadata. Your entire AI setup — memory, instructions, project knowledge, skills — maps into these three sections with nothing left over. The only thing your platform needs to do is read the file.
+
+Here's what that looks like. Same prompt, with and without a character file:
 
 **Without a character file:**
 
@@ -26,13 +45,15 @@ Here's the same prompt with and without a character file:
 >
 > **Morgan:** Three things, in order of urgency:
 >
-> 1. **Rekon pricing memo.** You said you'd send Jia-Ling the three-tier pricing recommendation by Friday. The decision was made last session but the memo hasn't been drafted yet. This is your hardest deadline this week.
-> 2. **Mosaic Health prep.** Monday 10am call with Rina. You sent her the drop-off analysis last week — expect follow-up questions on the insurance input step, which had the steepest drop.
-> 3. **Petalink can wait.** Derek is async-only and the MVP scope was just locked down. Unless he pings you on Slack, no action needed.
->
-> Do you want to start drafting the Rekon memo now?
+> 1. **Rekon pricing memo.** You said you'd send the three-tier recommendation by Friday. Decision's made — memo isn't drafted yet.
+> 2. **Mosaic Health prep.** Monday 10am call with Rina. Expect follow-ups on the insurance input step.
+> 3. **Petalink can wait.** MVP scope just locked down. No action unless Derek pings.
 
-Without a character file, the AI asks for context. With one, it already has it — Morgan's working style, client details, and session history are all in the file. It's not a model retrieving fragments. It's a character that knows its own priorities, its own history, and its own way of working.
+Morgan doesn't need a memory system or a skills framework. Its working style, client details, and session history are all in one file — rules in Dispositions, facts in Knowledges, events in Experiences. That's why it works on any platform: the structure is in the language, not in the tooling.
+
+When you organize rules, facts, and stories into one file, what you get isn't just a configuration — it's a character. Morgan is one. A legal researcher could be another. So could a game NPC that grows with every player interaction.
+
+That's why the format is called CHARACTER.md. Not because it starts with a character concept, but because the structure produces one.
 
 ## Getting started
 
@@ -42,70 +63,29 @@ Give your AI a character file and tell it:
 Read the character file and respond as Morgan from now on.
 ```
 
-That's it. The AI picks up Morgan's tone, references client projects by name, and knows what decisions have already been made — all from the file.
+That's it. Try it with [Morgan](examples/agent/CHARACTER.md), a work assistant for a freelance product consultant. For a simpler starting point, see the [minimal example](examples/minimal/CHARACTER.md).
 
-Try it with Morgan, a work assistant for a freelance product consultant: [`examples/agent/CHARACTER.md`](examples/agent/CHARACTER.md). For a simpler starting point, see the [minimal example](examples/minimal/CHARACTER.md).
+How you deliver the file depends on your platform: paste it into a conversation, attach it, or add it as project knowledge. If your AI can write back to the file — through Google Drive, MCP, or any read/write integration — the character updates its own knowledge and appends new experiences after each session. The file grows with use.
 
-How you deliver the file is up to you: paste it into a conversation, attach it, or add it as project knowledge. If your AI has write access to the file — through Google Drive, MCP, or any read/write integration — the character can update its own knowledges and append its own experiences after each session. Morgan's file includes write-back rules in its Dispositions, so the character already knows when and how to maintain its own memory.
-
-> **Claude users:** connect Google Drive in Settings for read/write access. The AI can then keep the character file up to date after each conversation.
+> **Claude users:** connect Google Drive in Settings to give the AI read/write access to the character file.
 
 ## What you can build with it
 
-**A personal AI that actually knows you.** Define how your agent behaves, what it knows about your work, and let experiences accumulate over time. Each conversation starts where the last one left off, because the knowledge is in the file.
+**A multi-agent team.** Each agent is a self-contained file. Load several into one conversation and they each bring their own knowledge, rules, and history. The file is the boundary.
 
-**A multi-agent team.** Each agent is a self-contained file. Load several into one conversation and they each bring their own dispositions, knowledge, and history — a team that works together without stepping on each other. The file is the boundary.
+**An expert agent.** A character doesn't have to be fictional. The same structure works for a legal researcher, a customer support persona, or any role where the AI needs stable expertise and evolving context.
 
-**An expert agent.** A character doesn't have to be fictional. Morgan is a work assistant — a professional role with domain knowledge, client context, and a working style. The same structure works for a legal researcher, a customer support persona, or any role where the AI needs stable expertise and evolving context.
-
-**A stateful NPC or game character.** Define starting traits and knowledge, then let experiences fill in as players interact. The format already separates what changes from what doesn't, so you don't need to build that logic yourself.
-
-## How it works
-
-A CHARACTER.md file has three sections, each written in a distinct sentence type that the AI already knows how to handle:
-
-**Dispositions** — how the character behaves and what it can do. Written as conditional-instruction pairs: "when X, do Y." Rules, tendencies, skills, and boundaries. The AI reads an instruction and follows it. These tend to stay stable because instructions don't expire the way facts do. Write-back rules belong here too — instructions like "when a client's status changes, update the relevant entry in Knowledges" are dispositions, which means a character can carry its own memory-management logic inside the file.
-
-**Knowledges** — what the character knows. Written as factual statements: "X is Y." Domain knowledge, situational awareness, and working context. Some facts rarely change; others are current state marked with "currently" that gets updated as things happen. The AI reads a fact and trusts it — or updates it when the fact changes.
-
-**Experiences** — what the character has been through. Written as narratives: what happened, in what order, and what it led to. A record of events, decisions, and interactions. The AI reads a narrative and remembers it. New entries are appended, old ones are never rewritten — the way memory works.
-
-```
-CHARACTER.md
-├── Dispositions      — how it behaves        (conditional-instruction pairs)
-├── Knowledges        — what it knows          (factual statements)
-└── Experiences       — what it's been through (narratives)
-```
-
-No special syntax. No metadata tags. The structure lives in the sentence types themselves — the same ones humans have always used to describe rules, facts, and stories. An AI reading a CHARACTER.md doesn't need to be told which section does what; the language already carries that information.
-
-Any aspect of a character — abilities, preferences, values, emotional tendencies, goals, relationships, trauma — maps to one of these three sentence types. There is no fourth. The framework is complete: nothing falls through the cracks, and nothing overlaps.
-
-This three-way split mirrors the procedural / semantic / episodic memory model from cognitive science, specifically the [CoALA framework](https://arxiv.org/abs/2309.02427) (Cognitive Architectures for Language Agents). Dispositions map to procedural memory, knowledges to semantic memory, experiences to episodic memory. The format inherits a structure that cognitive science and AI research have already validated.
-
-The spec defines a semantic structure, not a file format. Markdown is the simplest implementation — plain text, no tooling, works everywhere — but the same three sections work in a Google Doc, a Notion page, a Craft document, or any medium your AI can read.
-
-## How is this different?
-
-AI platforms organize your setup by mechanism — what the interface can do. Memory stores what happened. Custom instructions store how to behave. Project knowledge stores reference material. Skills store procedures. The same character ends up described in four or five different mechanisms, in four or five different places, with no shared structure. Move to a different platform and it all falls apart, because each platform's mechanisms are different.
-
-CHARACTER.md organizes by sentence type — what the information actually is. An instruction is a disposition, whether it controls behavior, defines a skill, or sets a boundary. A fact is knowledge, whether it's domain expertise, project context, or current status. A narrative is an experience, whether it captures a conversation, a decision, or a milestone.
-
-The three sentence types are exhaustive — there is no aspect of a character that doesn't map to one of them. And because they're sentence types, not mechanisms, they work the same way regardless of which AI platform you hand the file to.
-
-This distinction also explains how CHARACTER.md relates to more specific tools. System prompts and custom instructions put rules, facts, and context into flat text where the AI can't tell what's stable from what's outdated — CHARACTER.md separates them by sentence type. Formats like CLAUDE.md and AGENTS.md give agents structured procedural knowledge — CHARACTER.md covers the rest: identity, domain knowledge, and history. Memory frameworks like Mem0, Zep, and Fabric build the plumbing to persist and retrieve — CHARACTER.md gives the knowledge flowing through that plumbing a semantic shape, so the AI knows whether to follow it, update it, or append to it.
+**A game character that grows.** Define starting traits and knowledge, then let experiences fill in as players interact. The format already separates what changes from what doesn't.
 
 ## Where to go from here
 
-To understand why the format is designed this way — why three sections, why natural language, why not YAML — read the [design rationale](RATIONALE.md).
+The three sentence types map to the procedural / semantic / episodic memory model from cognitive science, specifically the [CoALA framework](https://arxiv.org/abs/2309.02427). The spec defines a semantic structure, not a file format — the same three sections work in Markdown, a Google Doc, a Notion page, or any medium your AI can read. For the full design rationale, see [RATIONALE.md](RATIONALE.md).
 
-If you're building a tool or platform that consumes character files, the [spec](SPEC.md) has the precise definitions, conformance rules, and lifecycle semantics.
-
-For a working example of a CHARACTER.md served over MCP, see [book-mcp](https://github.com/liheng-personal/book-mcp).
+If you're building a tool or platform that consumes character files, the [spec](SPEC.md) has precise definitions, conformance rules, and lifecycle semantics. For a working example served over MCP, see [book-mcp](https://github.com/liheng-personal/book-mcp).
 
 ## License
 
-This specification is released under [CC BY 4.0](LICENSE). Use it, build on it, adapt it — just give credit.
+This specification is released under [CC BY 4.0](LICENSE).
 
 ## Credits
 
