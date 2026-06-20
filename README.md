@@ -6,7 +6,11 @@ CHARACTER.md gives your agent a structured identity. Three sections — disposit
 
 ## Getting started
 
-Give your AI a character file — paste it into the conversation, attach it, or add it to your project's knowledge base — and tell it:
+Save the character file somewhere your AI can read and write — a Google Doc works well. When the file is writable, the AI updates it after each conversation: new knowledge and experiences are written back to the right sections automatically.
+
+> **Claude users:** connect Google Drive in Settings to give your AI read/write access. **Just trying it out?** Paste the file into a conversation instead — the format works the same way, but the character won't remember what it learned.
+
+Tell your AI:
 
 ```
 Read the character file and respond as Morgan from now on.
