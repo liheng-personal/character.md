@@ -4,15 +4,7 @@ AI agents forget who they are. Memory tools like Mem0, Zep, and LangMem help age
 
 CHARACTER.md gives your agent a structured identity. Three sections — dispositions, knowledges, and experiences — each handle a different kind of memory that changes at a different rate. One file, plain Markdown, no runtime dependency.
 
-## Getting started
-
-The fastest way to understand the format is to look at one. Here's a work assistant that manages clients and tracks project status across sessions:
-
-[`examples/agent/CHARACTER.md`](examples/agent/CHARACTER.md)
-
-Copy it into a conversation with any AI, and the AI will know how to behave, what projects are active, and what happened in the last few sessions. Edit it, and you have your own agent.
-
-To see what this looks like in practice, here's the same prompt with and without a character file:
+Here's the same prompt with and without a character file:
 
 **Without a character file:**
 
@@ -39,6 +31,14 @@ To see what this looks like in practice, here's the same prompt with and without
 > Do you want to start drafting the Rekon memo now?
 
 The first response asks for context. The second one already has it — the projects, the history, and the priorities are all in the file. Your agent starts working from the first message, no onboarding needed.
+
+## Getting started
+
+The fastest way to understand the format is to look at one. Here's a work assistant that manages clients and tracks project status across sessions:
+
+[`examples/agent/CHARACTER.md`](examples/agent/CHARACTER.md)
+
+Copy it into a conversation with any AI, and the AI will know how to behave, what projects are active, and what happened in the last few sessions. Edit it, and you have your own agent.
 
 **To get started with your own agent:**
 
