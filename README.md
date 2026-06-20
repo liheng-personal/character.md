@@ -1,8 +1,8 @@
 # CHARACTER.md
 
-A plain-text file that gives an AI a complete character.
+CHARACTER.md is what turns a language model into a specific character — one that knows how to behave, carries domain and personal knowledge, and remembers what's happened recently.
 
-Three sections, three sentence types: dispositions are written as conditional-instruction pairs, knowledges as factual statements, experiences as narratives. The AI reads natural language it already understands — no schema, no metadata, no infrastructure needed.
+Three sections make this work. Dispositions tell the AI how to act. Knowledges give it what it needs to know. Experiences give it a history. Each is written in a different sentence type — instructions, facts, narratives — that the AI already understands. No schema, no metadata, no infrastructure.
 
 Here's the same prompt with and without a character file:
 
@@ -30,7 +30,7 @@ Here's the same prompt with and without a character file:
 >
 > Do you want to start drafting the Rekon memo now?
 
-The first response asks for context. The second already has it — Morgan's working style, client details, and session history are all in the file. The AI isn't retrieving fragments; it's a character that knows its own history, priorities, and style.
+Without a character file, the AI asks for context. With one, it already has it — Morgan's working style, client details, and session history are all in the file. It's not a model retrieving fragments. It's a character that knows its own priorities, its own history, and its own way of working.
 
 ## Getting started
 
