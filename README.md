@@ -59,7 +59,7 @@ Please play this role.
 
 If you want the character to learn and remember things (new rules, knowledges, and things that happened), make it editable for the agent. I use Craft to implement CHARACTER.md and connect my claude.ai chats to it, but a .md file on Dropbox, NotebookLM, or even an Airtable table can easily work. The point is for the agent to update CHARACTER.md on their own.
 
-## Tooling Structure
+## Implementation
 
 ```
 CHARACTER.md (text content) <-> Connector <-> AI Harness.
@@ -92,7 +92,7 @@ This specification is released under [CC BY 4.0](LICENSE).
 CHARACTER.md is created and maintained by [Li-Heng Hsu](https://lihenghsu.com) of [Narrativesaw](https://narrativesaw.com).
 
 ---
-Annotations: 0,6975 SHA-256 f69d73c48134566a3196  
-&Claude <claude.ai>: 556,2 2132,112 2258,9 2273,25 2304,19 2518,348 2867,21 2890,27 2918,425 4196 4273,53 5102,23 5126 5925,32 5958,149 6380,177 6700,192 6973,2  
-@Li-Heng Hsu <lihenghsu.com>: 0,556 558,1574 2244,14 2267,6 2298,6 2323,195 2866 2888,2 2917 3343,853 4197,76 4326,776 5125 5127,798 5957 6107,273 6557,143 6892,81  
+Annotations: 0,6972 SHA-256 c2684a4e8a8a579121a5  
+&Claude <claude.ai>: 556,2 2132,112 2258,9 2273,25 2304,19 2518,348 2867,21 2890,27 2918,425 4196 4273,53 5099,23 5123 5922,32 5955,149 6377,177 6697,192 6970,2  
+@Li-Heng Hsu <lihenghsu.com>: 0,556 558,1574 2244,14 2267,6 2298,6 2323,195 2866 2888,2 2917 3343,853 4197,76 4326,773 5122 5124,798 5954 6104,273 6554,143 6889,81  
 ...
