@@ -1,6 +1,6 @@
 # CHARACTER.md
 
-CHARACTER.md is the whole data required for an agent to become a character who knows you, in a single file or a package. Memories, skills, instructions, knowledges… CHARACTER.md has it all. 
+CHARACTER.md is the whole data required for an agent to become a character who knows you and remember things in a single file or a package. Memories, skills, instructions, knowledges… CHARACTER.md has it all. 
 
 Getting an agent to know you is cumbersome. You need to setup instructions, find memory solutions, install skills, and maintain all of them continuously, or they will soon start to contradict themselves. Worst of all? They are all different configs and services, so you need to travel back and forth just for fixing a wrong fact.
 
@@ -92,7 +92,7 @@ This specification is released under [CC BY 4.0](LICENSE).
 CHARACTER.md is created and maintained by [Li-Heng Hsu](https://lihenghsu.com) of [Narrativesaw](https://narrativesaw.com).
 
 ---
-Annotations: 0,6956 SHA-256 06181428689b7fe91ce9  
-&Claude <claude.ai>: 537,2 2113,112 2239,9 2254,25 2285,19 2499,348 2848,21 2871,27 2899,425 4177 4254,53 5083,23 5107 5906,32 5939,149 6361,177 6681,192 6954,2  
-@Li-Heng Hsu <lihenghsu.com>: 0,537 539,1574 2225,14 2248,6 2279,6 2304,195 2847 2869,2 2898 3324,853 4178,76 4307,776 5106 5108,798 5938 6088,273 6538,143 6873,81  
+Annotations: 0,6975 SHA-256 f69d73c48134566a3196  
+&Claude <claude.ai>: 556,2 2132,112 2258,9 2273,25 2304,19 2518,348 2867,21 2890,27 2918,425 4196 4273,53 5102,23 5126 5925,32 5958,149 6380,177 6700,192 6973,2  
+@Li-Heng Hsu <lihenghsu.com>: 0,556 558,1574 2244,14 2267,6 2298,6 2323,195 2866 2888,2 2917 3343,853 4197,76 4326,776 5125 5127,798 5957 6107,273 6557,143 6892,81  
 ...
