@@ -1,77 +1,76 @@
 # Design Rationale
 
-This document explains *why* CHARACTER.md is designed the way it is — the problem it solves, the cognitive science behind its memory model, and the trade-offs behind its key design decisions.
+This document explains *why* CHARACTER.md is designed the way it is — the problem it solves, the cognitive science behind its structure, and the trade-offs behind its key design decisions.
 
 ## The Problem
 
-Imagine you're a game master using an AI to play an NPC in your tabletop campaign. You paste a paragraph of backstory into the system prompt: the character's name, personality, a few key relationships. The first few exchanges are great. Then, ten turns in, the character "forgets" a fact you established. Fifteen turns in, it contradicts its own personality. By turn twenty, you're spending more effort correcting the AI than playing the game.
+Every AI platform organizes what it knows about you differently. One keeps behavioral rules in "custom instructions." Another stores facts in "memory." A third splits knowledge across "projects" and "skills." Each mechanism has its own location, format, and limitations.
 
-This failure isn't random. It stems from a structural problem: the character definition is an unstructured blob of text. There's no separation between "how this character acts," "what this character knows," and "what this character has been through." The AI has no way to distinguish a behavioral rule from a trivia fact from a past event — so it treats them all the same, and they blur together as the conversation grows.
+This means the same piece of information — say, that you always want citations in your reports — lives in different places depending on which platform you use. Move to a new tool and you start over. Use two tools in parallel and they contradict each other. Use one tool long enough and its own mechanisms contradict each other, because nothing enforces consistency across memory, instructions, and project knowledge.
 
-The same problem surfaces everywhere characters need to persist: AI agents that lose their personality across sessions, voice actors who receive inconsistent character guides, game designers whose NPC definitions don't survive the handoff between writers and programmers.
+The root cause is not that these mechanisms are poorly built. It is that they classify information by *mechanism* — by where the platform happens to store it — rather than by *meaning*. A behavioral rule and a factual statement end up in the same "memory" bucket. A preference and a procedure share the same "instructions" field. When the categories don't match the content, drift is inevitable.
 
-CHARACTER.md addresses this by giving characters **structured memory** — not more text, but text organized by what kind of memory it is.
+The same structural problem surfaces wherever characters or agents need to persist: game designers whose NPC definitions don't survive handoffs between writers and programmers, voice actors who receive character guides that blur personality with backstory, AI assistants that lose coherence across sessions because their knowledge has no internal structure.
 
-## Why Three Kinds of Memory
+CHARACTER.md addresses this by organizing information according to what it *means* — three semantic categories that correspond to fundamentally different kinds of sentences.
 
-A character needs to track three fundamentally different things:
+## Why Three Semantic Categories
 
-**How they act** — behavioral rules, speech patterns, moral boundaries, professional procedures. These are relatively stable. A character who speaks formally doesn't suddenly switch to slang (unless something dramatic happens). A financial analyst who always cites sources doesn't stop citing them mid-conversation. These are the character's *dispositions*.
+Almost any sentence you would write to define a character falls into one of three types. They differ in what they express, how they are structured, and how they change over time.
 
-**What they know** — facts about the world, about themselves, about other characters. Some facts never change (the character's birthplace, the laws of their universe). Others shift as circumstances change (their current assignment, the status of a project, what they've learned recently). These are the character's *knowledges*.
+**Dispositions** — rules that govern how the character acts. Their basic unit is the condition–instruction pair: "When X, do Y." Sometimes the condition is implicit — always active, never stated — making the instruction appear unconditional: "Never fabricate sources." Dispositions vary along two independent axes: by *activation* (implicit or explicit) and by *function* (constraints that must be followed, or tendencies that describe how the character naturally reacts). A constraint violated is an error; a tendency overridden by context is not.
 
-**What happened to them** — events, encounters, decisions, consequences. This is inherently chronological or causal. Unlike facts, events have a narrative arc — they happen in sequence, and later events build on earlier ones. These are the character's *experiences*.
+**Knowledges** — facts about the world, the character, or the domain. They take the form of declarative statements ("X is Y") or question–answer pairs ("Q: What is X? → A: X is Y"). Some are stable facts that do not change. Others are mutable state — current conditions that shift as circumstances evolve. The two coexist within the same section but must be distinguishable, so a reader or system can tell which knowledge is settled and which is subject to change.
 
-These three categories have fundamentally different properties. Dispositions are imperative ("do this when that happens"); knowledges are declarative ("X is Y"); experiences are narrative ("then this happened"). Dispositions change rarely; mutable knowledge changes as tasks progress; experiences only accumulate — you can archive old ones, but you don't edit them.
+**Experiences** — events organized along a narrative axis. Unlike knowledges, which describe what is true now, experiences record what happened: decisions made, outcomes observed, context that shaped them. They may be organized temporally (by when things occurred), causally (by what led to what), or without a particular axis (simply recording that something happened). These organizations are not mutually exclusive.
 
-When all three are mixed into a single prompt or document, the system can't tell which is which. An event gets treated as a permanent fact. A rule gets softened by a nearby anecdote. Current state gets mixed up with historical state. Structured separation solves this by letting each memory type be stored, retrieved, and updated according to its own nature.
+These three categories are exhaustive. Try to think of a fourth kind of sentence that defines a character — a sentence that is not a rule, not a fact, and not an event. The difficulty of finding one is itself the argument for completeness. The categories do not overlap: a sentence that describes a static attribute belongs in Knowledges, while a sentence that describes a reaction to a condition belongs in Dispositions. The test is whether the sentence contains a stimulus and a response. "Prefers formal language" is a fact. "When addressed casually, responds formally" is a disposition.
 
-## The Cognitive Science Foundation
+When all three are mixed into a single prompt or document, the system cannot distinguish which is which. A rule gets softened by a nearby anecdote. Current state gets confused with historical state. An event gets treated as a permanent fact. Semantic separation solves this by letting each category be stored, retrieved, and updated according to its own nature.
 
-This three-way split is not arbitrary. It maps onto a well-established model in cognitive science: the distinction between **procedural memory** (knowing how), **semantic memory** (knowing what), and **episodic memory** (knowing when/where something happened).
+## Cognitive Foundation
 
-CHARACTER.md specifically draws on **CoALA** — Cognitive Architectures for Language Agents (Sumers, Yao, Narasimhan & Griffiths, 2023), which adapts this cognitive framework to the architecture of AI agents. CoALA proposes that an effective language agent needs:
+The three-way split is not arbitrary. It maps onto a well-established model in cognitive science: the distinction between **procedural memory** (knowing how), **semantic memory** (knowing what), and **episodic memory** (knowing when/where something happened).
 
-- **Working memory** — what is currently loaded into the context window. Small, expensive, immediately available.
-- **Long-term memory** — persistent storage outside the context window. Large, cheap, retrieved on demand.
+CHARACTER.md specifically draws on **CoALA** — Cognitive Architectures for Language Agents (Sumers, Yao, Narasimhan & Griffiths, 2023), which adapts this cognitive framework to the architecture of AI agents. CoALA proposes that an effective language agent needs working memory (what is currently loaded into context) and long-term memory (persistent storage retrieved on demand), with long-term memory further divided into procedural, semantic, and episodic types.
 
-And within long-term memory, CoALA distinguishes:
-
-- **Procedural memory** — action policies and behavioral rules.
-- **Semantic memory** — factual knowledge about the world.
-- **Episodic memory** — records of past events and interactions.
-
-CHARACTER.md translates this directly into a file format. The main CHARACTER.md file is working memory — it's loaded at the start of every session. The three folders (dispositions/, knowledges/, experiences/) are long-term memory — their files are only pulled in when the agent needs them.
-
-This means the format isn't just an organizational convenience. It reflects how memory actually works — both in cognitive science and in the practical constraints of AI context windows.
+CHARACTER.md adopts this cognitive structure but translates it into a more humanistic vocabulary — Dispositions, Knowledges, and Experiences — to reflect the specification's broader scope. CoALA describes a memory architecture for AI agents; CHARACTER.md defines the semantic structure of a character that can be performed by any system, including but not limited to AI agents. The specification defines what kinds of information a character contains and how they relate to each other. It does not prescribe how that information is stored, loaded, or updated — those decisions belong to the implementation.
 
 ## Design Decisions
 
-### Plain Markdown, not YAML/JSON/XML
+### Natural language sentences, not structured data
 
-CHARACTER.md files are plain Markdown because the primary consumer is a language model reading natural language. Structured formats like YAML or JSON would add parsing overhead for the human author without improving the AI's comprehension — in fact, natural prose is what language models process best. Markdown also makes files readable by humans without tooling, version-controllable with Git, and editable in any text editor.
+The basic unit of CHARACTER.md is the *sentence*: the smallest semantically complete piece of natural language. A sentence is defined by semantic completeness, not punctuation — it may be a single typographic sentence or span an entire paragraph, as long as it expresses one complete idea.
 
-The trade-off: Markdown lacks a formal schema. You can't validate a CHARACTER.md file the way you validate JSON against a schema. We accept this because the format's value comes from semantic clarity, not syntactic enforcement.
+This choice has consequences. Natural language is what language models process best, and it is what humans read without tooling. A character definition written in natural language sentences can be loaded into any AI system, read by a voice actor, or handed to a game designer — without parsers, schemas, or format-specific tooling. The specification gains universality by building on the most widely understood medium there is.
 
-### Eager/lazy loading split
+The trade-off: natural language lacks a formal schema. You cannot validate a CHARACTER.md definition the way you validate JSON against a schema. The specification accepts this because its value comes from semantic clarity, not syntactic enforcement.
 
-The main file is designed to be small enough to fit comfortably in a context window alongside the conversation. Everything else is deferred. This means an agent doesn't pay the token cost for the character's entire backstory in every message — only when it actually needs to recall something specific.
+### Medium-agnostic specification
 
-The trade-off: the agent needs a retrieval mechanism to access the folder contents. The spec deliberately does not prescribe how this retrieval works. It could be tool calls, RAG, manual copy-paste, or a platform-specific API. This makes the format portable across runtimes, at the cost of requiring each implementation to solve retrieval independently.
+The specification defines semantic structure — what kinds of sentences a character definition contains and how they relate to each other. It does not prescribe file formats, directory layouts, storage mechanisms, or update procedures. A conformant character definition could be a Markdown file, a Google Doc with three headings, a set of Craft subpages, a Notion database, or a row in Airtable.
 
-### "Currently" prefix for mutable state
+This decision follows from the core diagnosis. The problem CHARACTER.md solves is that information gets scattered when classified by mechanism — by the storage format or platform feature it happens to live in. Binding the specification to a particular file format would reintroduce the same problem at a different level: the character's portability would be limited by the format rather than by the platform. A semantic specification is portable by nature, because meaning does not change when the container does.
 
-Mutable state in Knowledges is marked with a temporal prefix (e.g., "Currently tracking three threads"). This convention exists so that both humans and AIs can instantly distinguish stable facts from state that will change. When scanning a knowledge section, anything without "Currently" is safe to treat as permanent; anything with it should be verified or updated.
+The trade-off: implementors must decide for themselves how to realize the semantic structure in their chosen medium. The specification gives them the *what* but not the *how*. This is deliberate — the range of environments where CHARACTER.md needs to work (from Cloudflare Workers to paper notes) is too wide for any single implementation prescription to serve.
 
-The trade-off: it's a convention, not a formal mechanism. Nothing stops someone from writing mutable state without the prefix. We rely on the author's discipline rather than tooling enforcement, in keeping with the format's preference for human readability over machine validation. Note that "Currently" is the English convention; authors writing in other languages should use the equivalent temporal marker (e.g., 「目前」 in Chinese, 「現在」 in Japanese).
+### Constraints and tendencies, not rules and personality
 
-### Spec prescribes semantics, not mechanisms
+Dispositions are divided by semantic function into constraints (obligations and prohibitions that must be followed) and tendencies (reactive patterns that the character naturally exhibits). This replaces earlier framings that split dispositions into "external rules" versus "internal behavior patterns."
 
-CHARACTER.md defines what each section *means* — Dispositions are behavioral rules, Knowledges are facts, Experiences are events. It does not define how they get updated. An AI might write its own experience logs automatically; a human author might update knowledges by hand; a game engine might push state changes through an API. The spec supports all of these equally.
+The reason: the earlier framing was based on *who defined the rule* (external authority versus internal nature), but this is not a semantic distinction. A constraint can come from within ("I never lie") just as a tendency can come from outside ("corporate training makes her default to formal language"). The semantically meaningful difference is whether violation constitutes an error. A constraint violated is a failure; a tendency overridden by context is normal.
 
-The trade-off: this means the spec alone doesn't give you a working system. You need to build (or choose) the runtime layer yourself. We made this choice because the format needs to work across wildly different environments — from a Cloudflare Worker serving MCP requests to a voice actor reading notes on paper. Prescribing an update mechanism would lock the format to a specific technology stack.
+The trade-off: this classification requires the author to make a judgment about each disposition — is this a rule the character must follow, or a pattern the character tends to exhibit? The specification does not automate this judgment. In practice, the distinction is usually obvious from context, but edge cases exist and are left to the author's discretion.
+
+### Semantics, not mechanisms
+
+CHARACTER.md defines what each section *means*. It does not define how sections get stored, how they get loaded into context, how they get updated, or how an implementation should split content between eager and lazy retrieval. An AI might write its own experience logs automatically. A human author might update knowledges by hand. A game engine might push state changes through an API. A voice actor might read the whole thing on paper. The specification supports all of these equally.
+
+This principle extends further than it might first appear. The specification does not prescribe the "Currently" prefix or any other convention for distinguishing mutable state from stable facts — only that they must be distinguishable by *some* means. It does not prescribe file extensions, directory structures, or heading syntax — only that the three sections appear in order. Every requirement in the specification is a semantic requirement. If a requirement would only make sense in a particular medium, it does not belong in the specification.
+
+The trade-off: the specification alone does not give you a working system. You need to build (or choose) a storage layer, a loading mechanism, and — if you want the character to grow — a write-back process. This means more work for the implementor, but it also means the specification can serve environments that no single implementation could anticipate.
 
 ## Further Reading
 
-- [SPEC.md](SPEC.md) — the full format specification.
+- [SPEC.md](SPEC.md) — the full specification.
 - Sumers, T. R., Yao, S., Narasimhan, K., & Griffiths, T. L. (2023). *Cognitive Architectures for Language Agents.* arXiv:2309.02427. [https://arxiv.org/abs/2309.02427](https://arxiv.org/abs/2309.02427)
