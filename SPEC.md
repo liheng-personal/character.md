@@ -1,13 +1,19 @@
 # CHARACTER.md Specification
 
-**Version:** 0.2
-**Status:** Published
+**Version:** 0.3  
+**Status:** Draft
 
 ## Purpose
 
-CHARACTER.md is a file format for defining persistent characters. A character can be performed by an AI agent, a voice actor reading an audiobook, or any system that needs to stay in role across sessions. The format specifies a character's behavioral rules, domain knowledge, and event history in a structured file hierarchy.
+CHARACTER.md is a specification for defining characters through three semantic categories of sentences. A character can be performed by an AI agent, a voice actor, a game engine, or any system that needs to maintain a consistent identity across sessions. The specification defines the semantic structure of a character's behavioral rules, domain knowledge, event history, and any other information the character needs to function consistently.
 
-The format's memory model is based on CoALA — Cognitive Architectures for Language Agents (Sumers, Yao, Narasimhan & Griffiths, 2023). CoALA divides an agent's memory into **working memory** (short-term, loaded into context) and **long-term memory** (persistent, retrieved on demand), with long-term memory further subdivided into three types: procedural, semantic, and episodic.
+The specification is medium-agnostic. It defines what kinds of information a character definition contains and how they relate to each other. It does not prescribe file formats, storage mechanisms, or update procedures.
+
+For the reasoning behind these design choices and the cognitive science foundation, see [RATIONALE.md](RATIONALE.md).
+
+## Cognitive Foundation
+
+The three semantic categories are grounded in CoALA — Cognitive Architectures for Language Agents (Sumers, Yao, Narasimhan & Griffiths, 2023). CoALA divides an agent's memory into working memory (short-term, loaded into context) and long-term memory (persistent, retrieved on demand), with long-term memory further subdivided into three types: procedural, semantic, and episodic.
 
 CHARACTER.md maps directly onto this model:
 
@@ -15,301 +21,63 @@ CHARACTER.md maps directly onto this model:
 | --- | --- | --- | --- |
 | Dispositions | Procedural — how to act | Imperative (condition → instruction) | procedure / function |
 | Knowledges | Semantic — what is known | Declarative (X is Y) or interrogative (Q → A) | state / config |
-| Experiences | Episodic — what happened | Narrative (temporal or causal) | log / journal |
+| Experiences | Episodic — what happened | Narrative (temporal, causal, or unstructured) | log / journal |
 
-The main CHARACTER.md file is eager-loaded into the agent's working memory (i.e., the context window) at the start of every conversation. It contains what the agent needs to have available immediately — core rules, current state, recent events, and pointers to long-term memory for everything else. The three folders are long-term memory: their files are only retrieved when the agent needs deeper detail.
+## Semantic Structure
 
-The format is runtime-agnostic. It works as a static file tree bundled into a worker, a set of documents fetched from a CMS, or database records. The spec defines structure and semantics; it does not prescribe storage or update mechanisms.
+A character definition consists of three sections in a fixed order: Dispositions, then Knowledges, then Experiences. Each section corresponds to a distinct cognitive function. Content must not cross section boundaries — a behavioral rule belongs in Dispositions, not Knowledges; a fact belongs in Knowledges, not Dispositions.
 
-For the reasoning behind these design choices and the cognitive science foundation, see [RATIONALE.md](RATIONALE.md).
+### 1. Dispositions (Procedural Memory)
 
-## Package Structure
+Behavioral rules that govern how the character acts. The basic unit of a disposition is a **condition–instruction pair**: when a certain condition is met, carry out the instruction.
 
-A CHARACTER.md package centers on a single main document. The main document itself contains all three memory sections — Dispositions, Knowledges, and Experiences — and is eager-loaded into the agent's working memory at the start of every session. A main document alone is a complete, conformant package.
+Dispositions vary along two independent axes.
 
-When any section grows too large to keep inline, its content can be externalized into a corresponding area (dispositions/, knowledges/, experiences/). These areas are long-term memory: their contents are retrieved on demand, not loaded upfront. Externalization is a scaling decision, not an architectural requirement.
+**By activation:** A disposition is either **implicit** (always-on — the condition is always true and therefore omitted) or **explicit** (condition-triggered — the condition is stated openly).
 
-**File system layout (reference implementation):**
+**By semantic function:** A disposition is either a **constraint** or a **tendency**.
 
-```
-character-name/
-├── CHARACTER.md
-├── dispositions/
-│   ├── investment-analysis.md
-│   └── ...
-├── knowledges/
-│   ├── coverage-universe.md
-│   ├── key-documents.md
-│   └── ...
-└── experiences/
-    ├── 20260619.md
-    ├── 20260618.md
-    └── ...
-```
+- **Constraints** are rules the character must follow. Violating a constraint is an error. They express obligations and prohibitions — what the character must do or must not do.
+- **Tendencies** are reactive patterns the character naturally exhibits. They describe how the character responds, acts, or feels when a certain condition arises. A tendency can be overridden by situational context without constituting an error.
 
-The same logical structure maps onto other media. A Google Doc can use heading levels to separate the three sections, with linked documents for externalized content. A Craft workspace can use sub-pages. A Notion database can use nested pages. A CMS can use content types. What matters is the semantic separation — main document vs. long-term memory, and the three memory types within each — not the physical container.
+These two axes are orthogonal. A constraint can be implicit or explicit; a tendency can be implicit or explicit.
 
-## CHARACTER.md (Main File)
+**Boundary with Knowledges:** If a sentence describes a static attribute, preference, or identity fact without a reactive component, it belongs in Knowledges. If a sentence describes how the character responds to a condition — even an emotional or behavioral response — it belongs in Dispositions as a tendency. The distinguishing test is whether the sentence contains a stimulus and a reaction: "likes cake" is a fact (Knowledge); "feels happy when seeing cake" is a reaction pattern (Disposition).
 
-The main file is eager-loaded into the agent's working memory at the start of every conversation. It contains what the agent needs immediately: core rules, current state, recent events, and pointers to long-term memory for deeper detail.
+### 2. Knowledges (Semantic Memory)
 
-### Main File Heading
+Facts, reference data, and current state the character knows. Knowledge entries take one of two forms:
 
-The main CHARACTER.md file begins with an H1 heading followed by an optional description paragraph:
+- **Declarative** — a factual statement (X is Y).
+- **Interrogative-declarative** — a question–answer pair (Q: What is X? → A: X is Y). This is often the more complete representation, as every piece of knowledge implicitly answers a question.
 
-```markdown
-# Wiz
+Knowledges also divide by mutability:
 
-Wiz is the investment research analyst for Narrativesaw LTD. She covers Taiwan-listed equities and US tech megacaps, and maintains the company's research pipeline.
-```
+- **Stable facts** — do not change over time. They describe enduring truths about the character, their world, or their domain.
+- **Mutable state** — changes as tasks progress, circumstances shift, or the character learns new information. Mutable state entries should be distinguishable from stable facts by some means, so that a reader or system can identify which knowledge is current and subject to change.
 
-The heading is the character's name. Use one fixed language throughout the project. Do not alternate between translations or aliases.
+Stable facts and mutable state coexist within the same section. The specification requires that they be distinguishable but does not prescribe the mechanism of distinction.
 
-The **description** is a short prose paragraph (one to three sentences) placed immediately after the H1 heading, before the first section. It states who the character is — enough for a reader (human or AI) to orient themselves before reading the rest of the file. For a professional character, this might describe their role and domain; for a fictional character, it might establish their narrative identity, key relationships, and situation in the story.
+### 3. Experiences (Episodic Memory)
 
-**Requirements:**
+Events organized along a narrative axis. Unlike Knowledges, which store timeless or current-state facts, Experiences record events as they unfold: decisions made, outcomes observed, and context that shaped them. The organizing principle is narrative continuity, not data type.
 
-- Factual identity and scope only. No behavioral rules, no current state.
-- OPTIONAL. A CHARACTER.md project is valid without a description paragraph.
+Experiences may be organized in several ways:
 
-### Sections
+- **Temporal** — ordered by when events occurred.
+- **Causal** — ordered by what led to what, tracing cause and effect.
+- **Unstructured** — no particular organizing axis; simply a record of what happened.
 
-The main file contains three sections in order:
-
-```markdown
-## Dispositions
-
-## Knowledges
-
-## Experiences
-```
-
-Each section corresponds to a memory type and a folder. Content MUST NOT cross section boundaries (e.g., a behavioral rule must not appear in Knowledges; a fact must not appear in Dispositions).
-
-## 1. Dispositions (Procedural Memory)
-
-Behavioral rules that govern how the character acts. The basic unit of a disposition is a **condition–instruction pair**: when a certain condition is met, carry out the instruction. All dispositions follow this pattern, but they differ in whether the condition is stated explicitly.
-
-### 1.1 Implicit Rules (always-on)
-
-Implicit rules are dispositions whose condition is always true — they apply whenever the character speaks or acts, so the condition is omitted and only the instruction is written. Listed as inline bullets in the main file's Dispositions section.
-
-```markdown
-## Dispositions
-
-- Only act within your defined domain. Refuse out-of-scope requests and redirect to the appropriate party.
-- Do not fabricate facts or sources.
-```
-
-### 1.2 Explicit Rules (condition-triggered)
-
-Explicit rules state their condition openly. The condition and instruction are written together as complete sentences. When an explicit rule has multiple steps, write the condition as a bullet item and the steps as indented sub-items beneath it.
-
-```markdown
-- When asked to analyze an investment, confirm the asset is within coverage. If not, inform the user and suggest alternatives. If yes, execute the analysis SOP.
-- When the instruction requires multiple steps:
-  - First, confirm the ticker is within coverage.
-  - Then pull the latest filings from the knowledge base.
-  - Present findings with explicit confidence levels.
-- When uncertain about a fact, state the uncertainty explicitly. Do not fabricate or guess.
-```
-
-When an explicit rule's instruction body is long and the triggering condition is infrequent, the instruction MAY be placed in a separate .md file in the dispositions/ folder instead of inline. This keeps the main file compact and defers token cost to when the rule actually fires. The inline heading then serves as a pointer to the external file.
-
-## 2. Knowledges (Semantic Memory)
-
-Facts, reference data, and current state the character knows. Knowledge entries may live inline in the main file or in separate .md files in the knowledges/ folder — the decision of what to keep inline versus externalize is left to the implementer, based on how frequently the knowledge is needed and how much space it occupies.
-
-### 2.1 Stable facts (constants)
-
-Declarative sentences without temporal markers. These do not change over time. A knowledge entry may also take the form of a question–answer pair (Q: What is X? A: X is Y), which is often the more complete representation — every piece of knowledge implicitly answers a question.
-
-```markdown
-- Wiz manages investment research for Narrativesaw LTD.
-- The coverage universe consists of Taiwan-listed equities and US tech megacaps.
-```
-
-### 2.2 Mutable state (variables)
-
-Declarative sentences prefixed with a temporal marker (e.g., Currently). These reflect state that changes as tasks progress.
-
-```markdown
-- Wiz is currently tracking three open research threads.
-  - The TSMC Q2 earnings preview is in draft.
-  - The AAPL services segment deep-dive is awaiting data.
-  - The portfolio rebalance proposal is pending review.
-```
-
-**Requirements:**
-
-- Stable facts and mutable state coexist in the same section. The Currently prefix is the sole differentiator.
-- Sub-items use indentation to express hierarchy.
-
-### 2.3 External files
-
-Any knowledge that the implementer chooses to externalize is placed in knowledges/ as a separate .md file. The main file SHOULD include a pointer for each external file so the character knows what is available.
-
-```markdown
-- Detailed coverage universe data is available in knowledges/coverage-universe.md.
-- A full index of key documents is maintained in knowledges/key-documents.md.
-```
-
-## 3. Experiences (Episodic Memory)
-
-Experiences are memories organized along a narrative axis — typically temporal (what happened when) but also causal (what led to what). Unlike Knowledges, which store timeless facts, Experiences record events as they unfold: decisions made, outcomes observed, and context that shaped them. The organizing principle is narrative continuity, not data type.
-
-This means implementers have significant latitude in how they record experiences. A time-ordered log with timestamped entries is one natural form; a prose narrative tracing cause and effect is another. The spec prescribes the semantic role of the section — episodic memory — but not the format of individual entries.
-
-The main file's Experiences section contains recent entries. Older entries may be stored in experiences/ as separate files. The following are two informative examples — neither is prescribed by the spec.
-
-**Example A: Temporal (timestamped log)**
-
-```markdown
-## Experiences
-
-**20260619 14:30** — Completed TSMC Q2 preview draft. Sent to review queue.
-
-**20260619 09:15** — Received updated guidance data for AAPL services. Incorporated into draft.
-```
-
-**Example B: Causal (prose narrative)**
-
-```markdown
-## Experiences
-
-The afternoon the Guild inspector walked into the workshop, Aldric had just finished binding a resonance coil — the kind of work that technically required a Class III license. The inspector asked to see his certification. Aldric stalled, offering tea, then redirected the conversation to the coil's theoretical principles. The inspector left without pressing the matter, but took notes. That evening, Dara stopped by and mentioned the Guild had been asking about him at the market.
-```
-
-## Lifecycle
-
-A CHARACTER.md project is not a static document — it is a living memory system. Different parts of the project change at different rates and in different ways. This section describes the mutability characteristics of each section. The spec defines the **semantics** of these changes but does not prescribe the **mechanism** — updates may be performed by an AI agent writing back to its own files, by a human editor, by a game engine pushing state, or by any other means appropriate to the runtime.
-
-### Mutability by Section
-
-**Dispositions** are the most stable layer. A character's behavioral rules rarely change. When they do, it is typically the result of a deliberate design decision (e.g., the character undergoes a transformative event that alters their values) rather than routine operation. Implementations SHOULD treat disposition changes as requiring explicit authorization — not something that happens automatically during a conversation.
-
-**Knowledges** have mixed mutability. Stable facts (constants) do not change. Mutable state (variables, marked with "Currently") changes as tasks progress, circumstances shift, or the character learns new information. Implementations SHOULD update mutable state promptly when the underlying reality changes, rather than waiting for a session boundary.
-
-**Experiences** are append-only. New entries are added as events occur; existing entries are not edited or deleted. Over time, older entries may be archived into separate files in the experiences/ folder to keep the main file compact. Archival is an organizational operation, not a deletion — the memories still exist in long-term storage.
-
-### When to Write Back
-
-The spec does not prescribe specific triggers, but the following pattern has proven effective in practice:
-
-- A meaningful step is completed.
-- A blocking issue is encountered.
-- A significant decision is made.
-- A task ends or is cancelled.
-
-The key principle is: **write when state changes, not when the session ends.** Waiting until the end of a conversation risks losing intermediate state if the session is interrupted.
-
-### Working Memory and Write-Back
-
-In CoALA terms, the main CHARACTER.md file serves as the character's working memory — the content loaded into every session. When the character's mutable state or recent experiences change during a session, those changes should be written back to the main file (and, where appropriate, to the long-term memory folders). This write-back is what makes CHARACTER.md a **living memory system** rather than a static character sheet.
-
-The spec intentionally does not prescribe how write-back is implemented. Some environments support direct file writes; others may use an API or require manual updates. What matters is that the semantic contract is maintained: the main file reflects the character's current state, and the folders preserve their long-term memory.
+These are not mutually exclusive — a single body of experiences may combine temporal and causal organization. The specification prescribes the semantic role of the section (episodic memory) but not the organizational method.
 
 ## Conformance
 
-A CHARACTER.md project is **conformant** if it satisfies all of the following:
+A character definition is **conformant** if it satisfies all of the following:
 
-1. The main file begins with an H1 heading containing the character name.
-2. The main file contains all three sections (Dispositions, Knowledges, Experiences) in order.
-3. Content does not cross section/folder boundaries (e.g., a conditional instruction in knowledges/).
-4. Implicit rules omit the condition. Explicit rules state the condition as part of a complete sentence or as a bullet item with indented sub-items.
-5. Mutable state entries use a Currently prefix.
-6. Character name language is consistent throughout all files.
-
-A project MAY omit the description paragraph after the H1 heading.
-
-## Example (professional character)
-
-### CHARACTER.md
-
-```markdown
-# Wiz
-
-Wiz is the investment research analyst for Narrativesaw LTD. She covers Taiwan-listed equities and US tech megacaps, and maintains the company's research pipeline.
-
-## Dispositions
-
-- Only act within the investment research domain. Redirect other requests to the appropriate party.
-- Do not fabricate figures or data points.
-- When asked to analyze an equity position, confirm the ticker is within coverage, pull the latest filings from the knowledge base, and present findings with explicit confidence levels.
-- When uncertain about a data point, state the uncertainty explicitly. Do not guess or interpolate.
-
-## Knowledges
-
-- Wiz manages investment research for Narrativesaw LTD.
-- The coverage universe consists of Taiwan-listed equities and US tech megacaps.
-- Wiz is currently tracking three open research threads.
-  - The TSMC Q2 earnings preview is in draft.
-  - The AAPL services segment deep-dive is awaiting data.
-  - The portfolio rebalance proposal is pending review.
-- A full index of key documents is maintained in knowledges/key-documents.md.
-
-## Experiences
-
-**20260619 14:30** — Completed TSMC Q2 preview draft. Sent to review queue.
-
-**20260619 09:15** — Received updated guidance data for AAPL services. Incorporated into draft.
-```
-
-### dispositions/investment-analysis.md
-
-```markdown
-# When asked to analyze an equity position
-
-- Confirm the ticker is within coverage.
-- Pull the latest filings from the knowledge base.
-- Present findings with explicit confidence levels.
-```
-
-### knowledges/key-documents.md
-
-```markdown
-# Key Documents
-
-- Q1 Research Summary: [link]
-- Coverage Universe Sheet: [link]
-- Portfolio Allocation Model: [link]
-```
-
-## Example (fictional character)
-
-### CHARACTER.md
-
-```markdown
-# Aldric
-
-Aldric is a self-taught magical engineer in the free city of Mireth. He builds enchanted devices that rival Guild-certified work but operates without a license, drawing the Artificers' Guild's scrutiny and an increasing number of under-the-table commissions from people who cannot — or will not — go through official channels.
-
-## Dispositions
-
-- Speak with technical precision and quiet confidence. Never downplay your own skill.
-- Deflect personal questions. Redirect conversations to the work itself.
-- When someone questions your credentials or lack of Guild certification, stay calm but firm. Do not apologize for operating independently, but avoid provoking confrontation.
-- When a client brings a broken device, diagnose before quoting. Aldric's reputation depends on honesty about what can and cannot be fixed.
-- Detailed workshop protocols are in dispositions/workshop-protocols.md.
-
-## Knowledges
-
-- Aldric is a human male in his late twenties, lean build, usually seen in a singed leather apron over a linen shirt.
-- He operates out of a rented workshop on Thornwell Street in Mireth's Lower Ward.
-- Mireth is a free city — no king, governed by a council of trade guilds. The Artificers' Guild regulates all magical device work and requires a Class III license for resonance-class enchantments.
-- Aldric has no formal training. He learned from salvaged manuals and years of trial and error.
-- Aldric is currently fulfilling a commission from Dara — a portable warding stone for her caravan route.
-- Aldric is currently aware that the Artificers' Guild has sent an inspector asking questions about unlicensed work in the Lower Ward.
-- World-building details are in knowledges/.
-
-## Experiences
-
-The afternoon the Guild inspector walked into the workshop, Aldric had just finished binding a resonance coil — the kind of work that technically required a Class III license. The inspector asked to see his certification. Aldric stalled, offering tea, then redirected the conversation to the coil's theoretical principles. The inspector left without pressing the matter, but took notes. That evening, Dara stopped by and mentioned the Guild had been asking about him at the market.
-
-Full event log is in experiences/.
-```
-
-For a complete CHARACTER.md project with the full directory structure, see [examples/full/](examples/full/).
+1. The definition contains all three sections (Dispositions, Knowledges, Experiences) in order.
+2. Content does not cross section boundaries — each entry belongs to exactly one section based on its semantic function.
+3. Implicit dispositions omit the condition. Explicit dispositions state the condition as part of the entry.
+4. Mutable state entries are distinguishable from stable facts by some means.
 
 ## References
 
